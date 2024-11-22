@@ -31,30 +31,9 @@ jobs:
         role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
         audience: sts.amazonaws.com
         role-session-name: GitHubActionsSession
-        mask-aws-account-id: true
-
-    - name: Debug AWS Info
-      run: |
-        echo "🔍 Checking AWS Configuration..."
-        echo "AWS Region: ${{ env.AWS_REGION }}"
-        echo "Role ARN: ${{ secrets.AWS_ROLE_ARN }}"
-        echo "Account ID from AWS: $(aws sts get-caller-identity --query Account --output text)"
-        echo "User ARN: $(aws sts get-caller-identity --query Arn --output text)"
-        aws sts get-caller-identity
-
-    - name: Set up Docker
-      uses: docker/setup-buildx-action@v2
-
-    - name: Debug ECR Info
-      run: |
-        echo "🔍 Checking ECR Repository..."
-        echo "ECR Repository Name: ${{ env.ECR_REPOSITORY }}"
-        ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-        echo "Full ECR URI: ${ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}"
-        echo "Listing ECR repositories:"
-        aws ecr describe-repositories || echo "Failed to list repositories"
 
     - name: Login to Amazon ECR
+      id: login-ecr
       run: |
         echo "🔑 Attempting ECR Login..."
         ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
@@ -62,53 +41,30 @@ jobs:
         echo "ECR Registry: ${ECR_REGISTRY}"
         aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${ECR_REGISTRY}
 
-    - name: Debug Docker Context
-      run: |
-        echo "🔍 Checking Docker and Build Context..."
-        echo "Docker Context Location: ${{ env.DOCKER_CONTEXT }}"
-        echo "Contents of Docker Context Directory:"
-        ls -la ${{ env.DOCKER_CONTEXT }}
-        echo "Dockerfile contents:"
-        cat ${{ env.DOCKER_CONTEXT }}/Dockerfile
-
     - name: Build and push image to Amazon ECR
       id: build-image
       run: |
-        echo "🏗️ Starting Docker Build..."
         ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
         ECR_REGISTRY="${ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com"
         
-        echo "Building image: ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}"
-        echo "Using Dockerfile at: ${{ env.DOCKER_CONTEXT }}/Dockerfile"
+        # Debug directory contents
+        echo "Contents of repository:"
+        ls -la
+        echo "Contents of EXP directory:"
+        ls -la EXP/
         
-        # Build image
-        docker build -t ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}:${{ github.sha }} \
-          -f ${{ env.DOCKER_CONTEXT }}/Dockerfile ${{ env.DOCKER_CONTEXT }}
-        
-        echo "🚀 Pushing image to ECR..."
+        # Build and push
+        docker build -t ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}:${{ github.sha }} -f ${{ env.DOCKER_CONTEXT }}/Dockerfile ${{ env.DOCKER_CONTEXT }}
         docker push ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
         
         # Set output
         echo "image=${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}" >> $GITHUB_OUTPUT
-        
-        echo "✅ Build and push complete"
-        echo "Image: ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}"
-
-    - name: Debug App Runner Config
-      run: |
-        echo "🔍 Checking App Runner Configuration..."
-        echo "Service Name: ${{ env.APP_RUNNER_SERVICE }}"
-        echo "ECR Access Role: ${{ secrets.AWS_APPRUNNER_ECR_ACCESS_ROLE }}"
-        echo "Listing existing App Runner services:"
-        aws apprunner list-services --region ${{ env.AWS_REGION }} || echo "Failed to list services"
 
     - name: Deploy to App Runner
       id: deploy
       run: |
-        echo "🚀 Starting App Runner Deployment..."
         ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
         ECR_IMAGE="${ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ github.sha }}"
-        echo "Using image: ${ECR_IMAGE}"
         
         if ! aws apprunner list-services --region ${{ env.AWS_REGION }} | grep -q "${{ env.APP_RUNNER_SERVICE }}"; then
           echo "Creating new App Runner service..."
@@ -155,15 +111,12 @@ jobs:
     - name: Get App Runner URL
       id: get-url
       run: |
-        echo "⏳ Waiting for deployment to complete..."
         aws apprunner wait service-updated --service-name ${{ env.APP_RUNNER_SERVICE }} --region ${{ env.AWS_REGION }}
         URL=$(aws apprunner describe-service --service-name ${{ env.APP_RUNNER_SERVICE }} --region ${{ env.AWS_REGION }} --query "Service.ServiceUrl" --output text)
         echo "APP_URL=https://${URL}" >> $GITHUB_OUTPUT
         echo "::notice title=Deployment URL::https://${URL}"
-        echo "Service URL: https://${URL}"
 
     - name: Display App URL
       run: |
-        echo "🎉 Deployment Summary:"
         echo "🚀 Application deployed successfully!"
         echo "📝 Application URL: ${{ steps.get-url.outputs.APP_URL }}"
