@@ -4,12 +4,16 @@ from pydantic import BaseModel
 from openai import OpenAI, AsyncOpenAI
 import os
 from typing import Type, TypeVar
+import dotenv
 
-import sys
+dotenv.load_dotenv()
+
 # Define a generic type variable
+
 T = TypeVar("T", bound=BaseModel)
 
 OPENAI_KEY = os.environ["OPENAI_API_KEY"]
+
 
 def parse_input(
     system_content: str,
