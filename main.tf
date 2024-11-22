@@ -59,8 +59,8 @@ resource "aws_lambda_function" "deploy_handler" {
 
   environment {
     variables = {
-      ECS_CLUSTER  = "nvda-2hr"
-      ECS_SERVICE  = "nvda-2hr"
+      ECS_CLUSTER  = "fastapi-cluster"
+      ECS_SERVICE  = "fastapi-service1"
     }
   }
 }
