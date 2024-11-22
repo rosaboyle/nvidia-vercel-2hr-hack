@@ -5,7 +5,9 @@ from requests.packages.urllib3.util.retry import Retry  # type: ignore
 import logging
 from urllib.parse import quote_plus
 import os
+import dotenv
 
+dotenv.load_dotenv()
 SCRAPER_API_KEY = os.environ.get("SCRAPER_API_KEY", "")
 if SCRAPER_API_KEY == "":
     raise ValueError("SCRAPER_API_KEY is not set")
