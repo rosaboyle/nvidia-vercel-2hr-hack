@@ -8,6 +8,7 @@ def get_needed_packages() -> Set[str]:
     """Return a set of needed packages"""
     return {
         "fastapi",
+        "beautifulsoup4",
         "requests",
         "pydantic",
         "boto3",
