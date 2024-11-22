@@ -1,7 +1,10 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+*.tfstate
+*.tfstate.*
 *$py.class
+.aws-sam/
 
 # C extensions
 *.so
