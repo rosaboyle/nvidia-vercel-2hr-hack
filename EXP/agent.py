@@ -6,6 +6,11 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # current file directory
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
+# Import all the necessary modules
+
+# Import text extraction and html extraction
+from 
+
 from prompts import prompt_to_extract_toxins
 from text_2_entity import parse_input
 from pydantic_models import ToxinList
@@ -19,5 +24,9 @@ def extract_toxins(text: str) -> ToxinList:
     )
 
 if __name__ == "__main__":
-    print(extract_toxins(""))
+    with open("test_data.txt", "r") as f:
+        content = f.read()
+
+    print(extract_toxins(content))
+
 
