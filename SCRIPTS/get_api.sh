@@ -1,0 +1,1 @@
+aws apigatewayv2 get-apis --region us-west-2 --query 'Items[?Name==`nvidia-2hr-hack`].ApiEndpoint' --output text
