@@ -24,8 +24,6 @@ def extract_toxins(text: str) -> ToxinList:
 
 
 if __name__ == "__main__":
-    # with open("test_data.txt", "r") as f:
-    #     content = f.read()
 
     url = "https://www.epa.gov/chemicals-under-tsca/epa-calls-comments-candidates-peer-review-13-butadiene"
     text = url_to_text(url)
