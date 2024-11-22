@@ -46,6 +46,11 @@ class TextUrlResponse(BaseModel):
     text: str
 
 
+@app.get("/")
+async def root() -> dict[str, str]:
+    return {"message": "Hello World"}
+
+
 @app.post("/extract/urls", response_model=ToxinListResponse)
 async def combined_url_and_text(input_data: TextInput) -> ToxinListResponse:
     """
