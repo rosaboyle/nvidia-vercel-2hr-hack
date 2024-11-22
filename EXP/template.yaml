@@ -1,0 +1,24 @@
+# template.yaml
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: FastAPI Serverless Application
+
+Resources:
+  FastAPIFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: main.handler
+      Runtime: python3.10
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            PayloadFormatVersion: '2.0'
+
+Outputs:
+  WebEndpoint:
+    Description: "API Gateway endpoint URL"
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com"

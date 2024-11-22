@@ -6,16 +6,7 @@ from typing import Any, Set
 
 def get_needed_packages() -> Set[str]:
     """Return a set of needed packages"""
-    return {
-        "fastapi",
-        "requests",
-        "pydantic",
-        "boto3",
-        "mangum",
-        "openai",
-        "uvicorn",
-        "python-dotenv",
-    }
+    return {"aws-sam-cli"}
 
 
 def generate_requirements() -> Any:
@@ -42,7 +33,7 @@ def generate_requirements() -> Any:
     requirements.sort()
 
     # Write sorted requirements to file
-    with open("requirements.txt", "w") as f:
+    with open("requirements_dev.txt", "w") as f:
         for req in requirements:
             f.write(f"{req}\n")
 

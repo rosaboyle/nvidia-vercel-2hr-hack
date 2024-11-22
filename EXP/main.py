@@ -4,6 +4,7 @@ import sys
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, HttpUrl
 from typing import List
+from mangum import Mangum
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -130,6 +131,9 @@ def extract_toxins(text: str) -> ToxinList:
         response_format=ToxinList,
         model="gpt-4o",
     )
+
+
+handler = Mangum(app)
 
 
 if __name__ == "__main__":
