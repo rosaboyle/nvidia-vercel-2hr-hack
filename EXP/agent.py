@@ -9,8 +9,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 # Import all the necessary modules
 
 # Import text extraction and html extraction
-from 
-
+from url_2_text import url_to_text
 from prompts import prompt_to_extract_toxins
 from text_2_entity import parse_input
 from pydantic_models import ToxinList
