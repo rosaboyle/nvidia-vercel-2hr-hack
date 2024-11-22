@@ -132,15 +132,13 @@ def get_openai_text_response(
     return response.choices[0].message.content
 
 
-from openai.types.chat import (
+from openai.types.chat import (  # noqa: E402
     ChatCompletionSystemMessageParam,
     ChatCompletionUserMessageParam,
     ChatCompletionAssistantMessageParam,
-    ChatCompletionToolMessageParam,
-    ChatCompletionFunctionMessageParam,
 )
 
-from typing import Iterable
+from typing import Iterable  # noqa: E402
 
 
 class ChatMessageUser(BaseModel):
@@ -184,7 +182,9 @@ def open_ai_sequence_response(
     if client is None:
         client = OpenAI()
 
-    response = client.chat.completions.create(model=model, messages=messages)
+    response = client.chat.completions.create(
+        model=model, messages=messages  # type: ignore
+    )
 
     if not response.choices[0].message.content:
         raise ValueError("Failed to generate response.")
