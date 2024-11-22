@@ -8,10 +8,13 @@ __pycache__/
 
 # C extensions
 *.so
-
-*zip
+# Terraform
+*.zip
 terraform-provider*
 .terraform
+*.tfstate
+*.tfstate.*
+
 # Distribution / packaging
 .Python
 build/
