@@ -6,7 +6,9 @@ import logging
 from urllib.parse import quote_plus
 import os
 
-SCRAPER_API_KEY = os.environ.get("SCRAPER_API_KEY")
+SCRAPER_API_KEY = os.environ.get("SCRAPER_API_KEY", "")
+if SCRAPER_API_KEY == "":
+    raise ValueError("SCRAPER_API_KEY is not set")
 
 
 class ScrapingError(Exception):
