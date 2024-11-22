@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "FastAPI: Linux",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/Users/ddod/miniconda3/envs/dh/bin/uvicorn",
+            "args": [
+                "EXP.main:app",
+                "--port",
+                "5005",
+                "--reload"
+            ],
+        },
+    ]
+}
