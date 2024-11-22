@@ -1,16 +1,13 @@
-from fastapi import FastAPI
-from datetime import datetime
+import os
+import sys
 
-app = FastAPI()
+from mangum import Mangum
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-@app.get("/health")
-async def health_check() -> dict[str, str]:
-    return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
+# current file directory
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(current_dir)
+from router import app  # noqa: E402
 
-
-# For local testing
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+handler = Mangum(app)

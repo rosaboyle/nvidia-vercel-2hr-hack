@@ -1,0 +1,36 @@
+# serverless.yml
+service: fastapi-serverless
+
+provider:
+  name: aws
+  runtime: python3.11
+  region: us-east-1
+  memorySize: 256
+  timeout: 30
+
+functions:
+  api:
+    handler: main.handler
+    events:
+      - httpApi: '*'
+
+package:
+  patterns:
+    - '!**'               # Exclude everything
+    - '!node_modules/**'  # Explicitly exclude node_modules
+    - '!venv/**'         # Explicitly exclude virtual env
+    - '!.git/**'         # Explicitly exclude git
+    - '**/*.py'          # Include all .py files
+    - 'requirements.txt'
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    layer:
+      name: python-deps
+      description: Python dependencies for FastAPI
+    noDeploy:
+      - pytest
+      - pytest-cov
