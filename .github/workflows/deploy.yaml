@@ -1,0 +1,18 @@
+# Add this to your workflow file (.github/workflows/deploy.yml)
+permissions:
+    actions: read
+    checks: none
+    contents: read
+    deployments: none
+    issues: none
+    packages: none
+    pull-requests: none
+    repository-projects: none
+    security-events: none
+    statuses: none
+  
+  # And make sure your environment is protected
+  jobs:
+    deploy:
+      environment: production  # Add this line
+      runs-on: ubuntu-latest
