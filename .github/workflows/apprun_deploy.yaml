@@ -13,7 +13,6 @@ env:
   AWS_REGION: us-west-2
   ECR_REPOSITORY: nvda-2hr
   APP_RUNNER_SERVICE: nvda-2hr
-  DOCKER_CONTEXT: EXP
 
 jobs:
   deploy:
@@ -32,13 +31,19 @@ jobs:
         audience: sts.amazonaws.com
         role-session-name: GitHubActionsSession
 
-    - name: Login to Amazon ECR
-      id: login-ecr
+    - name: Copy Dockerfile and context
       run: |
-        echo "🔑 Attempting ECR Login..."
+        echo "Current directory contents:"
+        ls -la
+        echo "Copying EXP contents to root..."
+        cp -r EXP/* .
+        echo "Root directory after copy:"
+        ls -la
+
+    - name: Login to Amazon ECR
+      run: |
         ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
         ECR_REGISTRY="${ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com"
-        echo "ECR Registry: ${ECR_REGISTRY}"
         aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${ECR_REGISTRY}
 
     - name: Build and push image to Amazon ECR
@@ -47,17 +52,12 @@ jobs:
         ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
         ECR_REGISTRY="${ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com"
         
-        # Debug directory contents
-        echo "Contents of repository:"
-        ls -la
-        echo "Contents of EXP directory:"
-        ls -la EXP/
+        echo "Building Docker image..."
+        docker build -t ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}:${{ github.sha }} .
         
-        # Build and push
-        docker build -t ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}:${{ github.sha }} -f ${{ env.DOCKER_CONTEXT }}/Dockerfile ${{ env.DOCKER_CONTEXT }}
+        echo "Pushing to ECR..."
         docker push ${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
         
-        # Set output
         echo "image=${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}" >> $GITHUB_OUTPUT
 
     - name: Deploy to App Runner
