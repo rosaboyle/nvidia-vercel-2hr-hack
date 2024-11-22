@@ -9,6 +9,7 @@ env:
   AWS_REGION: us-west-2
   ECR_REPOSITORY: nvda-2hr
   APP_RUNNER_SERVICE: nvda-2hr
+  DOCKER_CONTEXT: EXP  # Directory containing Dockerfile
 
 jobs:
   deploy:
@@ -37,6 +38,7 @@ jobs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: ${{ github.sha }}
       run: |
+        cd ${{ env.DOCKER_CONTEXT }}
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
